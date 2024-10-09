@@ -10,3 +10,7 @@ This repo houses the processing pipeline for electrode data visualization. Curre
 - waveform visualization
 - quality metric visualization
 - spike count histogram
+
+MAIN FILE: 
+sort.ipynb
+comment out processing steps that have already been computed.
