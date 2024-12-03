@@ -3,10 +3,6 @@ def main():
     import spikeinterface.full as si
     import spikeinterface.exporters as se
     from probeinterface import generate_tetrode, ProbeGroup
-    import kilosort
-    import mountainsort5 as ms5
-    from mountainsort5.util import create_cached_recording
-    import numpy as np
     import warnings
     import argparse
     import os
