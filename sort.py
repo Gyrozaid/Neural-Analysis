@@ -6,6 +6,7 @@ def main():
     import warnings
     import argparse
     import os
+    import torch
     warnings.simplefilter("ignore")
     print(f"SpikeInterface version: {si.__version__}")
 
@@ -33,7 +34,6 @@ def main():
         required=True,
         help='enter name of sorting algorithm'
     )
-    
 
     
     args = parser.parse_args()
@@ -66,16 +66,20 @@ def main():
     raw_rec = full_raw_rec.set_probegroup(probe_group, group_mode="by_probe")
     #run kilosort
     if algorithm == 'kilosort4':
+        cuda_available = torch.cuda.is_available()
+        device = "cuda" if cuda_available else "cpu"
         
+        print(f"CUDA available: {cuda_available}. Using device: {device}")
+
         sorted_recording = si.run_sorter("kilosort4", 
-                                    raw_rec, 
+                                    recording_loaded, 
                                     folder=path_to_results, 
                                     remove_existing_folder = True, 
                                     verbose=True,       
                                     nblocks=0,
                                     nearest_chans=4,
                                     save_preprocessed_copy=True,
-                                    torch_device="cuda"
+                                    torch_device=device
                                     )
     #run mountainsort
     elif algorithm == 'mountainsort5':
