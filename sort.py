@@ -66,6 +66,7 @@ def main():
     raw_rec = full_raw_rec.set_probegroup(probe_group, group_mode="by_probe")
     #run kilosort
     if algorithm == 'kilosort4':
+        recording_loaded=raw_rec
         cuda_available = torch.cuda.is_available()
         device = "cuda" if cuda_available else "cpu"
         
@@ -78,6 +79,7 @@ def main():
                                     verbose=True,       
                                     nblocks=0,
                                     nearest_chans=4,
+                                    whitening_range=4,
                                     save_preprocessed_copy=True,
                                     torch_device=device
                                     )
