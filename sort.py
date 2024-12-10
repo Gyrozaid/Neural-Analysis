@@ -89,7 +89,6 @@ def main():
         
     #run kilosort
     if algorithm == 'kilosort4':
-        recording_loaded=raw_rec
         cuda_available = torch.cuda.is_available()
         device = "cuda" if cuda_available else "cpu"
         
@@ -109,7 +108,7 @@ def main():
     #run mountainsort
     elif algorithm == 'mountainsort5':
         #filter and whiten
-        filtered = si.bandpass_filter(raw_rec, freq_min=300, freq_max=6000)
+        filtered = si.bandpass_filter(recording_loaded, freq_min=300, freq_max=6000)
         whitened = si.whiten(filtered, dtype='float32')
         recording_loaded = whitened
         
@@ -142,11 +141,9 @@ def main():
     #run spykingcircus2
     elif algorithm == 'spykingcircus2':
         #filter and whiten
-        filtered = si.bandpass_filter(raw_rec, freq_min=300, freq_max=6000)
+        filtered = si.bandpass_filter(recording_loaded, freq_min=300, freq_max=6000)
         whitened = si.whiten(filtered, dtype='float32')
         recording_loaded = whitened
-        #uncomment to slice part of recording for sorting        
-        #recording_loaded = recording_loaded.frame_slice(start_frame=0, end_frame=15*30000)
         
         #run sorter
         sorted_recording = si.run_sorter("spykingcircus2", 

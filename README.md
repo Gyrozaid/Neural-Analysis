@@ -40,8 +40,9 @@ Within the anaconda prompt:
 
 1. navigate to the project folder within your anaconda prompt
 2. run ```conda activate SpikeSorting```
-2. run ```python sort.py -p "enter path to your data" -s "enter path to your saved results" -a "enter name of sorting algorithm"```
+2. run ```python sort.py -p "enter path to your data" -s "enter path to your saved results" -a "enter name of sorting algorithm" -l length of sliced recording for testing```
     - options for sorting algorithms currently include "kilosort4", "spykingcircus2", and "mountainsort5"
+    - l parameter is optional. Use if you want a quick test of a recording
     - Kilosort4 is recommended. Fast runtime, and preprocessing, postprocessing, and export to Phy are handled internally (leaving less room for spikeinterface bugs). Highest performance as determined by number of units with low contamination.
 3. run ```conda activate phy2```
 4. run ```phy template-gui path_to_your_phy_python_file```
