@@ -35,12 +35,19 @@ def main():
         help='enter name of sorting algorithm'
     )
 
+    parser.add_argument(
+        '-l', '--recording_length',
+        type=str,
+        required=False,
+        help='enter length of recording if you are slicing it. Used for testing'
+    )
     
     args = parser.parse_args()
 
     path_to_data = args.path
     path_to_results = args.save_path
     algorithm = args.sorter_alg
+    length = args.recording_length
     
     #read in data
     if len(os.listdir(path_to_data + "\\experiment1\\recording1\\continuous")) == 2:
@@ -64,6 +71,22 @@ def main():
         
     probe_group.set_global_device_channel_indices([i for i in range(len(channel_names))])
     raw_rec = full_raw_rec.set_probegroup(probe_group, group_mode="by_probe")
+    
+    #slice recording for testing
+    if length:
+        try:
+            length = int(length)  
+            if length > 0:
+                recording_loaded = raw_rec.frame_slice(start_frame=0, end_frame=length * 30000)
+                print(f"First {length} seconds taken for sorting")
+            else:
+                raise ValueError("Length must be a positive integer.")
+        except ValueError as e:
+            print(f"Invalid recording length: {e}")
+            return
+    else:
+        recording_loaded = raw_rec
+        
     #run kilosort
     if algorithm == 'kilosort4':
         recording_loaded=raw_rec
@@ -89,7 +112,7 @@ def main():
         filtered = si.bandpass_filter(raw_rec, freq_min=300, freq_max=6000)
         whitened = si.whiten(filtered, dtype='float32')
         recording_loaded = whitened
-        #recording_loaded = recording_loaded.frame_slice(start_frame=0, end_frame=15*30000)
+        
         
         #sort
         sorted_recording = si.run_sorter_by_property(
@@ -122,7 +145,8 @@ def main():
         filtered = si.bandpass_filter(raw_rec, freq_min=300, freq_max=6000)
         whitened = si.whiten(filtered, dtype='float32')
         recording_loaded = whitened
-        recording_loaded = recording_loaded.frame_slice(start_frame=0, end_frame=15*30000)
+        #uncomment to slice part of recording for sorting        
+        #recording_loaded = recording_loaded.frame_slice(start_frame=0, end_frame=15*30000)
         
         #run sorter
         sorted_recording = si.run_sorter("spykingcircus2", 
