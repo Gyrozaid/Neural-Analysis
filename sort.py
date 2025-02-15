@@ -69,6 +69,10 @@ def main():
         tetrode.set_contact_ids([4*i, (4*i)+1, (4*i)+2, (4*i)+3])
         probe_group.add_probe(tetrode)
         
+    #sets decive channel indices (just 0 through # channels) to map to the channel names
+    #therefore, electrodes 0-3 are tetrode 0, 4-7 are tetrode 1, ect based on device channel indices, NOT channel names, which are irrelevent
+    #in phy, electrodes will be labeled with device channel index not channel name
+    
     probe_group.set_global_device_channel_indices([i for i in range(len(channel_names))])
     raw_rec = full_raw_rec.set_probegroup(probe_group, group_mode="by_probe")
     
