@@ -2,7 +2,7 @@
 def main():
     import spikeinterface.full as si
     import spikeinterface.exporters as se
-    from probeinterface import generate_tetrode, ProbeGroup
+    from probeinterface import generate_tetrode, ProbeGroup, generate_linear_probe
     import warnings
     import argparse
     import os
@@ -42,6 +42,14 @@ def main():
         help='enter length of recording if you are slicing it. Used for testing'
     )
     
+    parser.add_argument(
+        '-g', '--grouping',
+        type=int,
+        required=False,
+        help='enter how many probe groups are in the recording. Ensure groupings are divisible by # electrodes'
+    )
+
+    
     args = parser.parse_args()
 
     path_to_data = args.path
@@ -59,15 +67,33 @@ def main():
     channel_ids = full_raw_rec.get_channel_ids()
     full_raw_rec = full_raw_rec.select_channels([channel_id for channel_id in channel_ids if channel_id[0] != 'A'])
 
-    #make the probe group
-    channel_names = list(full_raw_rec.get_channel_ids())
-    probe_group = ProbeGroup()
 
-    for i in range(int(len(channel_names) / 4)):
-        tetrode = generate_tetrode()
-        tetrode.move([i * 100, 0])
-        tetrode.set_contact_ids([4*i, (4*i)+1, (4*i)+2, (4*i)+3])
-        probe_group.add_probe(tetrode)
+
+    #make the probe group
+    if args.grouping == None:
+        channel_names = list(full_raw_rec.get_channel_ids())
+        probe_group = ProbeGroup()
+
+        for i in range(int(len(channel_names) / 4)):
+            tetrode = generate_tetrode()
+            tetrode.move([i * 100, 0])
+            tetrode.set_contact_ids([4*i, (4*i)+1, (4*i)+2, (4*i)+3])
+            probe_group.add_probe(tetrode)
+            
+    else:
+        channel_names = list(full_raw_rec.get_channel_ids())
+        probe_group = ProbeGroup()
+
+        for i in range(int(len(channel_names) / args.grouping)):
+            linear_probe = generate_linear_probe(num_elec=args.grouping)
+            linear_probe.move([i * 100, 0])
+            contact_ids = []
+            for j in range(args.grouping):
+                contact_ids.append(args.grouping*i + j)
+                
+            linear_probe.set_contact_ids(contact_ids)
+            probe_group.add_probe(linear_probe)
+
         
     #sets decive channel indices (just 0 through # channels) to map to the channel names
     #therefore, electrodes 0-3 are tetrode 0, 4-7 are tetrode 1, ect based on device channel indices, NOT channel names, which are irrelevent
@@ -93,6 +119,9 @@ def main():
         
     #run kilosort
     if algorithm == 'kilosort4':
+        nearest_chans = 4 if args.grouping == None else args.grouping
+        whitening_range = 4 if args.grouping == None else args.grouping
+        
         cuda_available = torch.cuda.is_available()
         device = "cuda" if cuda_available else "cpu"
         
@@ -104,11 +133,12 @@ def main():
                                     remove_existing_folder = True, 
                                     verbose=True,       
                                     nblocks=0,
-                                    nearest_chans=4,
-                                    whitening_range=4,
+                                    nearest_chans=nearest_chans,
+                                    whitening_range=whitening_range,
                                     save_preprocessed_copy=True,
                                     torch_device=device
                                     )
+        
     #run mountainsort
     elif algorithm == 'mountainsort5':
         #filter and whiten
