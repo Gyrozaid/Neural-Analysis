@@ -68,6 +68,7 @@ def main():
     full_raw_rec = full_raw_rec.select_channels([channel_id for channel_id in channel_ids if channel_id[0] != 'A'])
 
 
+
     #make the probe group
     if args.grouping == None:
         channel_names = list(full_raw_rec.get_channel_ids())
@@ -84,7 +85,7 @@ def main():
         probe_group = ProbeGroup()
 
         for i in range(int(len(channel_names) / args.grouping)):
-            linear_probe = generate_linear_probe(num_elec=4)
+            linear_probe = generate_linear_probe(num_elec=args.grouping)
             linear_probe.move([i * 100, 0])
             contact_ids = []
             for j in range(args.grouping):
